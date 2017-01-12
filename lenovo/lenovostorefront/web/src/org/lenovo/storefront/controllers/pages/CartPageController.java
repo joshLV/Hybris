@@ -9,14 +9,11 @@
  * Information and shall use it only in accordance with the terms of the
  * license agreement you entered into with hybris.
  *
- *  
+ *
  */
 package org.lenovo.storefront.controllers.pages;
 
 import de.hybris.platform.acceleratorfacades.flow.impl.SessionOverrideCheckoutFlowFacade;
-import de.hybris.platform.acceleratorservices.controllers.page.PageType;
-import de.hybris.platform.acceleratorservices.enums.CheckoutFlowEnum;
-import de.hybris.platform.acceleratorservices.enums.CheckoutPciOptionEnum;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
 import de.hybris.platform.acceleratorstorefrontcommons.breadcrumb.ResourceBreadcrumbBuilder;
 import de.hybris.platform.acceleratorstorefrontcommons.constants.WebConstants;
@@ -24,15 +21,10 @@ import de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.Abstrac
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.util.GlobalMessages;
 import de.hybris.platform.acceleratorstorefrontcommons.forms.UpdateQuantityForm;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
-import de.hybris.platform.commercefacades.order.data.CartData;
-import de.hybris.platform.commercefacades.order.data.CartModificationData;
-import de.hybris.platform.commercefacades.order.data.OrderEntryData;
 import de.hybris.platform.commercefacades.product.ProductFacade;
-import de.hybris.platform.commercefacades.product.ProductOption;
-import de.hybris.platform.commercefacades.product.data.ProductData;
 import de.hybris.platform.commerceservices.order.CommerceCartModificationException;
+import de.hybris.platform.core.GenericSearchConstants.LOG;
 import de.hybris.platform.enumeration.EnumerationService;
-import org.lenovo.storefront.controllers.ControllerConstants;
 
 import java.util.Arrays;
 
@@ -42,6 +34,7 @@ import javax.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.lenovo.storefront.controllers.ControllerConstants;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -79,6 +72,8 @@ public class CartPageController extends AbstractCartPageController
 
 	@Resource(name = "productVariantFacade")
 	private ProductFacade productFacade;
+
+	//hello this first commit
 
 	@ModelAttribute("showCheckoutStrategies")
 	public boolean isCheckoutStrategyVisible()
@@ -259,16 +254,14 @@ public class CartPageController extends AbstractCartPageController
 			// Less than successful
 			GlobalMessages.addFlashMessage(redirectModel, GlobalMessages.ERROR_MESSAGES_HOLDER,
 					"basket.page.message.update.reducedNumberOfItemsAdded.lowStock", new Object[]
-			{ cartModification.getEntry().getProduct().getName(), cartModification.getQuantity(), form.getQuantity(),
-					request.getRequestURL().append(cartModification.getEntry().getProduct().getUrl()) });
+					{ cartModification.getEntry().getProduct().getName(), cartModification.getQuantity(), form.getQuantity(), request.getRequestURL().append(cartModification.getEntry().getProduct().getUrl()) });
 		}
 		else
 		{
 			// No more stock available
 			GlobalMessages.addFlashMessage(redirectModel, GlobalMessages.ERROR_MESSAGES_HOLDER,
 					"basket.page.message.update.reducedNumberOfItemsAdded.noStock", new Object[]
-			{ cartModification.getEntry().getProduct().getName(),
-					request.getRequestURL().append(cartModification.getEntry().getProduct().getUrl()) });
+					{ cartModification.getEntry().getProduct().getName(), request.getRequestURL().append(cartModification.getEntry().getProduct().getUrl()) });
 		}
 	}
 
