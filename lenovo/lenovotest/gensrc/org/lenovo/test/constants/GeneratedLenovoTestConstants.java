@@ -1,7 +1,7 @@
 /*
  * ----------------------------------------------------------------
  * --- WARNING: THIS FILE IS GENERATED AND WILL BE OVERWRITTEN! ---
- * --- Generated at 10 Jan, 2017 2:23:03 PM                     ---
+ * --- Generated at 12 Jan, 2017 5:09:20 PM                     ---
  * ----------------------------------------------------------------
  */
 package org.lenovo.test.constants;
