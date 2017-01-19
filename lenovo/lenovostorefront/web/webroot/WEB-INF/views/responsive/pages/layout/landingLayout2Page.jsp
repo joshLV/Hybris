@@ -36,7 +36,7 @@
 			</div>
 		</div>
 
-		<div class="row">
+		<div class="row">j
 			<div class="col-xs-12 no-space">
 			<cms:pageSlot position="Section3" var="feature">
 				<cms:component component="${feature}" element="div" class="col-xs-12 no-space yComponentWrapper"/>
