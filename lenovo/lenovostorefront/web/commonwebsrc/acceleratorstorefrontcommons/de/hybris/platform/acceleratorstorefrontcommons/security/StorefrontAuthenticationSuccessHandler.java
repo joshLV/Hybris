@@ -1,30 +1,25 @@
 /*
  * [y] hybris Platform
  *
- * Copyright (c) 2000-2016 hybris AG
+ * Copyright (c) 2000-2016 SAP SE or an SAP affiliate company.
  * All rights reserved.
  *
- * This software is the confidential and proprietary information of hybris
+ * This software is the confidential and proprietary information of SAP
  * ("Confidential Information"). You shall not disclose such Confidential
  * Information and shall use it only in accordance with the terms of the
- * license agreement you entered into with hybris.
- *
- *  
+ * license agreement you entered into with SAP.
  */
 package de.hybris.platform.acceleratorstorefrontcommons.security;
 
 import de.hybris.platform.acceleratorservices.uiexperience.UiExperienceService;
 import de.hybris.platform.acceleratorstorefrontcommons.constants.WebConstants;
+import de.hybris.platform.acceleratorstorefrontcommons.strategy.CartRestorationStrategy;
 import de.hybris.platform.commercefacades.customer.CustomerFacade;
 import de.hybris.platform.commercefacades.order.CartFacade;
 import de.hybris.platform.commerceservices.enums.UiExperienceLevel;
-import de.hybris.platform.commerceservices.order.CommerceCartMergingException;
-import de.hybris.platform.commerceservices.order.CommerceCartRestorationException;
 import de.hybris.platform.core.Constants;
-import de.hybris.platform.servicelayer.session.SessionService;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -57,8 +52,8 @@ public class StorefrontAuthenticationSuccessHandler extends SavedRequestAwareAut
 	private CustomerFacade customerFacade;
 	private UiExperienceService uiExperienceService;
 	private CartFacade cartFacade;
-	private SessionService sessionService;
 	private BruteForceAttackCounter bruteForceAttackCounter;
+	private CartRestorationStrategy cartRestorationStrategy;
 	private Map<UiExperienceLevel, Boolean> forceDefaultTargetForUiExperienceLevel;
 	private List<String> restrictedPages;
 	private List<String> listRedirectUrlsForceDefaultTarget;
@@ -66,7 +61,6 @@ public class StorefrontAuthenticationSuccessHandler extends SavedRequestAwareAut
 
 	private static final String CHECKOUT_URL = "/checkout";
 	private static final String CART_URL = "/cart";
-	private static final String CART_MERGED = "cartMerged";
 
 	private static final Logger LOG = Logger.getLogger(StorefrontAuthenticationSuccessHandler.class);
 
@@ -89,22 +83,13 @@ public class StorefrontAuthenticationSuccessHandler extends SavedRequestAwareAut
 				}
 			}
 		}
-
 		getCustomerFacade().loginSuccess();
-		request.setAttribute(CART_MERGED, Boolean.FALSE);
+		request.setAttribute(WebConstants.CART_MERGED, Boolean.FALSE);
 
 		// Check if the user is in role admingroup
 		if (!isAdminAuthority(authentication))
 		{
-			if (!getCartFacade().hasEntries())
-			{
-				restoreSavedCart();
-			}
-			else
-			{
-				restoreSavedCartAndMerge(request);
-			}
-
+			getCartRestorationStrategy().restoreCart(request);
 			getBruteForceAttackCounter().resetUserCounter(getCustomerFacade().getCurrentCustomerUid());
 			super.onAuthenticationSuccess(request, response, authentication);
 		}
@@ -112,52 +97,6 @@ public class StorefrontAuthenticationSuccessHandler extends SavedRequestAwareAut
 		{
 			LOG.warn("Invalidating session for user in the " + Constants.USER.ADMIN_USERGROUP + " group");
 			invalidateSession(request, response);
-		}
-	}
-
-	protected void restoreSavedCart()
-	{
-		getSessionService().setAttribute(WebConstants.CART_RESTORATION_SHOW_MESSAGE, Boolean.TRUE);
-		try
-		{
-			getSessionService().setAttribute(WebConstants.CART_RESTORATION, getCartFacade().restoreSavedCart(null));
-		}
-		catch (final CommerceCartRestorationException e)
-		{
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug(e);
-			}
-			getSessionService().setAttribute(WebConstants.CART_RESTORATION_ERROR_STATUS, WebConstants.CART_RESTORATION_ERROR_STATUS);
-		}
-	}
-
-	protected void restoreSavedCartAndMerge(final HttpServletRequest request)
-	{
-		final String sessionCartGuid = getCartFacade().getSessionCartGuid();
-		final String mostRecentSavedCartGuid = getMostRecentSavedCartGuid(sessionCartGuid);
-		if (StringUtils.isNotEmpty(mostRecentSavedCartGuid))
-		{
-			getSessionService().setAttribute(WebConstants.CART_RESTORATION_SHOW_MESSAGE, Boolean.TRUE);
-			try
-			{
-				getSessionService().setAttribute(WebConstants.CART_RESTORATION,
-						getCartFacade().restoreCartAndMerge(mostRecentSavedCartGuid, sessionCartGuid));
-				request.setAttribute(CART_MERGED, Boolean.TRUE);
-			}
-			catch (final CommerceCartRestorationException e)
-			{
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug(e);
-				}
-				getSessionService().setAttribute(WebConstants.CART_RESTORATION_ERROR_STATUS,
-						WebConstants.CART_RESTORATION_ERROR_STATUS);
-			}
-			catch (final CommerceCartMergingException e)
-			{
-				LOG.error("User saved cart could not be merged", e);
-			}
 		}
 	}
 
@@ -193,17 +132,6 @@ public class StorefrontAuthenticationSuccessHandler extends SavedRequestAwareAut
 	public void setCartFacade(final CartFacade cartFacade)
 	{
 		this.cartFacade = cartFacade;
-	}
-
-	protected SessionService getSessionService()
-	{
-		return sessionService;
-	}
-
-	@Required
-	public void setSessionService(final SessionService sessionService)
-	{
-		this.sessionService = sessionService;
 	}
 
 	protected CustomerFacade getCustomerFacade()
@@ -254,26 +182,13 @@ public class StorefrontAuthenticationSuccessHandler extends SavedRequestAwareAut
 		 * If the cart has been merged and the user logging in through checkout, redirect to the cart page to display the
 		 * new cart
 		 */
-		if (StringUtils.equals(targetUrl, CHECKOUT_URL) && BooleanUtils.toBoolean((Boolean) request.getAttribute(CART_MERGED)))
+		if (StringUtils.equals(targetUrl, CHECKOUT_URL)
+				&& BooleanUtils.toBoolean((Boolean) request.getAttribute(WebConstants.CART_MERGED)))
 		{
 			targetUrl = CART_URL;
 		}
 
 		return targetUrl;
-	}
-
-	/**
-	 * Determine the most recent saved cart of a user for the site that is not the current session cart. The current
-	 * session cart is already owned by the user and for the merging functionality to work correctly the most recently
-	 * saved cart must be determined. getMostRecentCartGuidForUser(excludedCartsGuid) returns the cart guid which is
-	 * ordered by modified time and is not the session cart.
-	 *
-	 * @param currentCartGuid
-	 * @return most recently saved cart guid
-	 */
-	protected String getMostRecentSavedCartGuid(final String currentCartGuid)
-	{
-		return getCartFacade().getMostRecentCartGuidForUser(Arrays.asList(currentCartGuid));
 	}
 
 	protected Map<UiExperienceLevel, Boolean> getForceDefaultTargetForUiExperienceLevel()
@@ -341,4 +256,16 @@ public class StorefrontAuthenticationSuccessHandler extends SavedRequestAwareAut
 	{
 		return adminAuthority;
 	}
+
+	protected CartRestorationStrategy getCartRestorationStrategy()
+	{
+		return cartRestorationStrategy;
+	}
+
+	@Required
+	public void setCartRestorationStrategy(final CartRestorationStrategy cartRestorationStrategy)
+	{
+		this.cartRestorationStrategy = cartRestorationStrategy;
+	}
+
 }

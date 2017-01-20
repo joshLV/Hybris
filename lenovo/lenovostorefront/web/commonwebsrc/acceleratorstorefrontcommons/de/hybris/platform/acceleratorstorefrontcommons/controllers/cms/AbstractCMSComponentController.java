@@ -1,15 +1,13 @@
 /*
  * [y] hybris Platform
  *
- * Copyright (c) 2000-2016 hybris AG
+ * Copyright (c) 2000-2016 SAP SE or an SAP affiliate company.
  * All rights reserved.
  *
- * This software is the confidential and proprietary information of hybris
+ * This software is the confidential and proprietary information of SAP
  * ("Confidential Information"). You shall not disclose such Confidential
  * Information and shall use it only in accordance with the terms of the
- * license agreement you entered into with hybris.
- *
- *  
+ * license agreement you entered into with SAP.
  */
 package de.hybris.platform.acceleratorstorefrontcommons.controllers.cms;
 
@@ -40,6 +38,11 @@ public abstract class AbstractCMSComponentController<T extends AbstractCMSCompon
 	protected static final String COMPONENT = "component";
 	protected static final String SANITIZE_REGEX = "[^a-zA-Z0-9_]";
 
+	/**
+	 * @deprecated Since 6.0. use
+	 *             {@link de.hybris.platform.acceleratorstorefrontcommons.controllers.cms.AbstractCMSComponentController#LOGGER}
+	 *             instead.
+	 */
 	@Deprecated
 	protected static final Logger LOG = Logger.getLogger(AbstractCMSComponentController.class);
 	private static final Logger LOGGER = Logger.getLogger(AbstractCMSComponentController.class);
@@ -58,7 +61,6 @@ public abstract class AbstractCMSComponentController<T extends AbstractCMSCompon
 
 	@RequestMapping
 	public String handleGet(final HttpServletRequest request, final HttpServletResponse response, final Model model)
-			throws Exception
 	{
 
 		T component = (T) request.getAttribute(COMPONENT);
@@ -113,7 +115,7 @@ public abstract class AbstractCMSComponentController<T extends AbstractCMSCompon
 	}
 
 	protected String handleComponent(final HttpServletRequest request, final HttpServletResponse response, final Model model,
-			final T component) throws Exception
+			final T component)
 	{
 		fillModel(request, model, component);
 		return getView(component);

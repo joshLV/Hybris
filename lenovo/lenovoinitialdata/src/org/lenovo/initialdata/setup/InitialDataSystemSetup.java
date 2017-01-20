@@ -1,17 +1,19 @@
+package org.lenovo.initialdata.setup;
+
+
+
 /*
  * [y] hybris Platform
  *
- * Copyright (c) 2000-2016 hybris AG
+ * Copyright (c) 2000-2016 SAP SE or an SAP affiliate company.
  * All rights reserved.
  *
- * This software is the confidential and proprietary information of hybris
+ * This software is the confidential and proprietary information of SAP
  * ("Confidential Information"). You shall not disclose such Confidential
  * Information and shall use it only in accordance with the terms of the
- * license agreement you entered into with hybris.
- *
- *
+ * license agreement you entered into with SAP.
  */
-package org.lenovo.initialdata.setup;
+
 
 import de.hybris.platform.commerceservices.dataimport.impl.CoreDataImportService;
 import de.hybris.platform.commerceservices.dataimport.impl.SampleDataImportService;
@@ -49,7 +51,7 @@ public class InitialDataSystemSetup extends AbstractSystemSetup
 	private static final String IMPORT_CORE_DATA = "importCoreData";
 	private static final String IMPORT_SAMPLE_DATA = "importSampleData";
 	private static final String ACTIVATE_SOLR_CRON_JOBS = "activateSolrCronJobs";
-	public static final String LENOVO = "lenovo";
+	private static final String LENOVO = "lenovo";
 
 	private CoreDataImportService coreDataImportService;
 	private SampleDataImportService sampleDataImportService;
@@ -106,24 +108,26 @@ public class InitialDataSystemSetup extends AbstractSystemSetup
 	 * </pre>
 	 *
 	 * @param context
-	 *           the context provides the selected parameters and values
-	 */
+	 *           the context provides the selected parameters and values	 */
 	@SystemSetup(type = Type.PROJECT, process = Process.ALL)
 	public void createProjectData(final SystemSetupContext context)
 	{
 		final List<ImportData> importData = new ArrayList<ImportData>();
 
-		final ImportData lenovoImportData = new ImportData();
-		lenovoImportData.setProductCatalogName(LENOVO);
-		lenovoImportData.setContentCatalogNames(Arrays.asList(LENOVO));
-		lenovoImportData.setStoreNames(Arrays.asList(LENOVO));
-		importData.add(lenovoImportData);
+		final ImportData hybrisImportData = new ImportData();
+
+		hybrisImportData.setProductCatalogName(LENOVO);
+		hybrisImportData.setContentCatalogNames(Arrays.asList(LENOVO ));
+		hybrisImportData.setStoreNames(Arrays.asList(LENOVO ));
+		importData.add(hybrisImportData);
 
 		getCoreDataImportService().execute(this, context, importData);
 		getEventService().publishEvent(new CoreDataImportedEvent(context, importData));
 
 		getSampleDataImportService().execute(this, context, importData);
 		getEventService().publishEvent(new SampleDataImportedEvent(context, importData));
+	}
+
 	}
 
 	public CoreDataImportService getCoreDataImportService()

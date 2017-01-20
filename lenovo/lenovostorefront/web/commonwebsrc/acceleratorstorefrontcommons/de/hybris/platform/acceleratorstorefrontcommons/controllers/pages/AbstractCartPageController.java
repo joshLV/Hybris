@@ -1,24 +1,24 @@
 /*
  * [y] hybris Platform
  *
- * Copyright (c) 2000-2016 hybris AG
+ * Copyright (c) 2000-2016 SAP SE or an SAP affiliate company.
  * All rights reserved.
  *
- * This software is the confidential and proprietary information of hybris
+ * This software is the confidential and proprietary information of SAP
  * ("Confidential Information"). You shall not disclose such Confidential
  * Information and shall use it only in accordance with the terms of the
- * license agreement you entered into with hybris.
- *
- *  
+ * license agreement you entered into with SAP.
  */
 package de.hybris.platform.acceleratorstorefrontcommons.controllers.pages;
 
 import de.hybris.platform.acceleratorfacades.order.AcceleratorCheckoutFacade;
 import de.hybris.platform.acceleratorservices.config.SiteConfigService;
 import de.hybris.platform.acceleratorstorefrontcommons.constants.WebConstants;
+import de.hybris.platform.acceleratorstorefrontcommons.forms.SaveCartForm;
 import de.hybris.platform.acceleratorstorefrontcommons.forms.UpdateQuantityForm;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
 import de.hybris.platform.commercefacades.order.CartFacade;
+import de.hybris.platform.commercefacades.order.SaveCartFacade;
 import de.hybris.platform.commercefacades.order.data.CartData;
 import de.hybris.platform.commercefacades.order.data.CartModificationData;
 import de.hybris.platform.commercefacades.order.data.OrderEntryData;
@@ -41,6 +41,11 @@ public abstract class AbstractCartPageController extends AbstractPageController
 	private static final String CART_CMS_PAGE_LABEL = "cart";
 	private static final String CONTINUE_URL = "continueUrl";
 
+	/**
+	 * @deprecated Since 6.0. use
+	 *             {@link de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.AbstractCartPageController#LOGGER}
+	 *             instead.
+	 */
 	@Deprecated
 	protected static final Logger LOG = Logger.getLogger(AbstractCartPageController.class);
 	private static final Logger LOGGER = Logger.getLogger(AbstractCartPageController.class);
@@ -56,6 +61,9 @@ public abstract class AbstractCartPageController extends AbstractPageController
 
 	@Resource(name = "acceleratorCheckoutFacade")
 	private AcceleratorCheckoutFacade checkoutFacade;
+
+	@Resource(name = "saveCartFacade")
+	private SaveCartFacade saveCartFacade;
 
 	protected void createProductList(final Model model) throws CMSItemNotFoundException
 	{
@@ -96,6 +104,11 @@ public abstract class AbstractCartPageController extends AbstractPageController
 		model.addAttribute("supportedCountries", cartFacade.getDeliveryCountries());
 		model.addAttribute("expressCheckoutAllowed", Boolean.valueOf(checkoutFacade.isExpressCheckoutAllowedForCart()));
 		model.addAttribute("taxEstimationEnabled", Boolean.valueOf(checkoutFacade.isTaxEstimationEnabledForCart()));
+		model.addAttribute("savedCartCount", saveCartFacade.getSavedCartsCountForCurrentUser());
+		if (!model.containsAttribute("saveCartForm"))
+		{
+			model.addAttribute("saveCartForm", new SaveCartForm());
+		}
 	}
 
 	/**

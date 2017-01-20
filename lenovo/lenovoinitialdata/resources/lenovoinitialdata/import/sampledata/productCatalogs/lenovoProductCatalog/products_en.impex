@@ -1,8 +1,8 @@
 # ImpEx for Importing Product Localisations
  
 # Macros / Replacement Parameter definitions
-$productCatalog=__PRODUCT_CATALOG_NAME__
-$productCatalogName=__PRODUCT_CATALOG_FULL_NAME__
+$productCatalog=lenovoProductCatalog
+$productCatalogName=lenovo Product Catalog
 
 $catalogVersion=catalogversion(catalog(id[default=$productCatalog]),version[default='Staged'])[unique=true,default=$productCatalog:Staged]
 
@@ -11,3 +11,7 @@ $lang=en
 
 # Update allProducts with localisations
 UPDATE Product;code[unique=true];$catalogVersion;name[lang=$lang];summary[lang=$lang];description[lang=$lang]
+             ;23191              ;               ;                 ;hjhh             ;Sony
+             ;23210              ;              ;                  ;rhwjh             ;pieces
+             ;23213              ;             ;                   ;Sony             ;sfjhfs
+             ;23231              ;            ;                    ;Sony             ;nskdnkjns

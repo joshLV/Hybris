@@ -1,15 +1,13 @@
 /*
  * [y] hybris Platform
  *
- * Copyright (c) 2000-2016 hybris AG
+ * Copyright (c) 2000-2016 SAP SE or an SAP affiliate company.
  * All rights reserved.
  *
- * This software is the confidential and proprietary information of hybris
+ * This software is the confidential and proprietary information of SAP
  * ("Confidential Information"). You shall not disclose such Confidential
  * Information and shall use it only in accordance with the terms of the
- * license agreement you entered into with hybris.
- *
- *  
+ * license agreement you entered into with SAP.
  */
 package de.hybris.platform.acceleratorstorefrontcommons.controllers.pages;
 
@@ -67,6 +65,11 @@ public abstract class AbstractPageController extends AbstractController
 	public static final String CMS_PAGE_MODEL = "cmsPage";
 	public static final String CMS_PAGE_TITLE = "pageTitle";
 
+	/**
+	 * @deprecated Since 6.0. use
+	 *             {@link de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.AbstractPageController#LOGGER}
+	 *             instead.
+	 */
 	@Deprecated
 	protected static final Logger LOG = Logger.getLogger(AbstractPageController.class);
 	private static final Logger LOGGER = Logger.getLogger(AbstractPageController.class);
@@ -101,7 +104,7 @@ public abstract class AbstractPageController extends AbstractController
 
 	@Resource(name = "siteConfigService")
 	private SiteConfigService siteConfigService;
-	
+
 	@Resource(name = "simpleBreadcrumbBuilder")
 	private ResourceBreadcrumbBuilder resourceBreadcrumbBuilder;
 
@@ -360,19 +363,20 @@ public abstract class AbstractPageController extends AbstractController
 		Assert.notNull(url, "Parameter [url] cannot be null");
 		return Functions.encodeUrl(url);
 	}
-	
+
 	/**
 	 * Prepares Not Found (404) Page
-	 * 
+	 *
 	 * @param model
-	 *            The model to pass with the page
+	 *           The model to pass with the page
 	 * @param response
-	 *            object represents http response needed for setting not found status.
-	 * @throws CMSItemNotFoundException 
-	 * 			  when cannot find ContentPage with {@value #ERROR_CMS_PAGE} id
-	 * 
+	 *           object represents http response needed for setting not found status.
+	 * @throws CMSItemNotFoundException
+	 *            when cannot find ContentPage with {@value #ERROR_CMS_PAGE} id
+	 *
 	 */
-	protected void prepareNotFoundPage(final Model model, final HttpServletResponse response) throws CMSItemNotFoundException{
+	protected void prepareNotFoundPage(final Model model, final HttpServletResponse response) throws CMSItemNotFoundException
+	{
 		storeCmsPageInModel(model, getContentPageForLabelOrId(ERROR_CMS_PAGE));
 		setUpMetaDataForContentPage(model, getContentPageForLabelOrId(ERROR_CMS_PAGE));
 		model.addAttribute(WebConstants.MODEL_KEY_ADDITIONAL_BREADCRUMB,
